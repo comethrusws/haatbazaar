@@ -37,7 +37,7 @@ model Product {
   stock        Int
   category     String?
   images       String[]
-  fakeEmbedding String? // for realism only
+  Embedding    String?
 }
 
 model Order {
