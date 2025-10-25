@@ -41,5 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 
-SYSTEM_DESIGN.md 
-CLAUDE.md 
+# SYSTEM_DESIGN.md 
+# CLAUDE.md 
+
+/app/generated/prisma
