@@ -1,15 +1,81 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
 generator client {
   provider = "prisma-client"
   output   = "../app/generated/prisma"
 }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+model User {
+  id          String   @id @default(uuid())
+  clerkId     String   @unique
+  email       String   @unique
+  name        String?
+  role        Role     @default(BUYER)
+  interactions Interaction[]
+  orders      Order[]
+  vendor      Vendor?
 }
+
+model Vendor {
+  id        String  @id @default(uuid())
+  userId    String  @unique
+  user      User    @relation(fields: [userId], references: [id])
+  shopName  String
+  products  Product[]
+}
+
+model Product {
+  id           String   @id @default(uuid())
+  vendorId     String
+  vendor       Vendor   @relation(fields: [vendorId], references: [id])
+  title        String
+  description  String?
+  priceCents   Int
+  stock        Int
+  category     String?
+  images       String[]
+  fakeEmbedding String? // for realism only
+}
+
+model Order {
+  id         String     @id @default(uuid())
+  buyerId    String
+  buyer      User       @relation(fields: [buyerId], references: [id])
+  totalCents Int
+  status     OrderStatus @default(PENDING)
+  paymentRef String?
+  items      OrderItem[]
+  createdAt  DateTime    @default(now())
+}
+
+model OrderItem {
+  id         String   @id @default(uuid())
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id])
+  productId  String
+  quantity   Int
+  unitPrice  Int
+}
+
+model Interaction {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  productId String?
+  type      InteractionType
+  createdAt DateTime @default(now())
+}
+
+model RecommendationLog {
+  id          String   @id @default(uuid())
+  userId      String
+  recommended String[]
+  createdAt   DateTime @default(now())
+}
+
+enum Role { BUYER VENDOR ADMIN }
+enum InteractionType { VIEW ADD_TO_CART PURCHASE }
+enum OrderStatus { PENDING PAID CANCELLED }
